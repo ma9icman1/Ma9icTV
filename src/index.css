@@ -52,6 +52,16 @@
   animation: fadeIn 0.15s ease-out forwards;
 }
 
+/* Favorite buttons use the existing Heart component but render as a star. */
+button:has(.lucide-heart) .lucide-heart {
+  display: none;
+}
+button:has(.lucide-heart)::after {
+  content: "★";
+  display: block;
+  font-size: 15px;
+  line-height: 1;
+}
 
 /* Responsive layout: phones, tablets and TV browsers */
 html, body, #root {
