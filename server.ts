@@ -123,7 +123,7 @@ async function startServer() {
             if (!trimmed || trimmed.startsWith('#')) {
               // Check for URI inside #EXT-X-KEY, #EXT-X-MAP, or #EXT-X-MEDIA
               if (trimmed.startsWith('#EXT-X-KEY:') || trimmed.startsWith('#EXT-X-MAP:') || trimmed.startsWith('#EXT-X-MEDIA:')) {
-                return line.replace(/URI=["']?([^"'\s>]+)["']?/i, (_match, uri) => {
+                return line.replace(/URI="([^"]+)"/, (_match, uri) => {
                   try {
                     const resolvedUri = new URL(uri, finalUrl).toString();
                     return `URI="/api/proxy?url=${encodeURIComponent(resolvedUri)}&${proxyParams}"`;

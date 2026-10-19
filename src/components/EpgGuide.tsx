@@ -434,7 +434,11 @@ export const EpgGuide: React.FC<EpgGuideProps> = ({
 
     if (sourceUrl) {
       localStorage.setItem('ma9ictv-epg-url', sourceUrl);
-      void handleLoadXmltv(false, sourceUrl);
+      // Give the video stream 5 seconds of uninterrupted bandwidth to build its buffer
+      const timer = window.setTimeout(() => {
+        void handleLoadXmltv(false, sourceUrl);
+      }, 5000);
+      return () => window.clearTimeout(timer);
     } else {
       localStorage.removeItem('ma9ictv-epg-url');
       setEpgLoadError('');

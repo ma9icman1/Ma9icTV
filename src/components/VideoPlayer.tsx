@@ -292,6 +292,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       video.pause();
       video.onloadedmetadata = null;
       video.onerror = null;
+      video.removeAttribute('src');
+      video.load();
       video.muted = false;
       video.volume = Math.max(0.01, volumeRef.current);
       setIsMuted(false);
@@ -304,8 +306,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
       // Clean up previous HLS instance
       if (hlsRef.current) {
-        hlsRef.current.stopLoad();
-        hlsRef.current.detachMedia();
         hlsRef.current.destroy();
         hlsRef.current = null;
       }
@@ -336,7 +336,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             setAutoSkipCountdown(4);
           }
         }
-      }, 9000);
+      }, 18000);
 
       const streamUserAgent = channel.httpUserAgent?.trim() || settings.customUserAgent;
       const proxyParams = `url=${encodeURIComponent(channel.url)}&userAgent=${encodeURIComponent(streamUserAgent)}${channel.httpReferrer?.trim() ? `&referer=${encodeURIComponent(channel.httpReferrer.trim())}` : ''}`;
@@ -359,18 +359,15 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       if (isHlsStream && Hls.isSupported()) {
         const configuredBuffer = Number(settings.bufferLengthSeconds) || 20;
         const hls = new Hls({
-          // Fast live playback: start on 1st segment with fragment prefetching
-          maxBufferLength: Math.max(8, Math.min(configuredBuffer, 30)),
-          maxMaxBufferLength: 45,
+          // Keep the user-selected buffer within a sensible range for TV devices.
+          maxBufferLength: Math.max(10, Math.min(configuredBuffer, 45)),
+          maxMaxBufferLength: 60,
           maxBufferSize: 60 * 1000 * 1000,
-          liveSyncDurationCount: 1,
-          liveMaxLatencyDurationCount: 4,
+          liveSyncDurationCount: 3,
+          liveMaxLatencyDurationCount: 6,
           enableWorker: true,
-          lowLatencyMode: true,
-          progressive: true,
-          startFragPrefetch: true,
-          startLevel: 0,
-          backBufferLength: 10,
+          lowLatencyMode: false,
+          backBufferLength: 15,
         });
 
         hlsRef.current = hls;
